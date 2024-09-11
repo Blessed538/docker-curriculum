@@ -25,7 +25,7 @@ jobs:
           docker build -t blessed1dominic/starlight:${{ github.sha }} .
 
       - name: Log in to DockerHub
-      
+
         run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
       - name: Push Docker Image
@@ -36,7 +36,7 @@ jobs:
         uses: appleboy/ssh-action@v0.1.0
         with:
           host: ${{ secrets.GCP_HOST }}
-          username: ec2-user
+          username: ubuntu
           key: ${{ secrets.GCP_SSH_KEY }}
           script: |
             docker pull blessed1dominic/starlight:${{ github.sha }}
