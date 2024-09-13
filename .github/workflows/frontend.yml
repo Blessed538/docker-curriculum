@@ -1,3 +1,56 @@
+# name: CI/CD for Frontend (Starlight)
+
+# on:
+#   push:
+#     branches:
+#       - master
+#   pull_request:
+#     branches:
+#       - master
+
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v3
+
+#       - name: Set up Docker Buildx
+#         uses: docker/setup-buildx-action@v2
+
+#       - name: Build Docker Image
+#         working-directory: ./starlight
+#         run: |
+#           docker build -t blessed1dominic/starlight:${{ github.sha }} .
+
+#       - name: Log in to DockerHub
+#         run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+#       - name: Push Docker Image
+#         run: |
+#           docker push blessed1dominic/starlight:${{ github.sha }}
+
+#       - name: SSH into GCP and Deploy Frontend
+#         uses: appleboy/ssh-action@v0.1.0
+#         with:
+#           host: ${{ secrets.GCP_HOST }} # Your GCP instance IP or hostname
+#           username: ubuntu # Your username on the GCP instance
+#           key: ${{ secrets.GCP_SSH_KEY }} # Your SSH private key
+#           script: |
+#             # Backup current container (optional)
+#             docker commit starlight-app starlight-app-backup || true
+#             # Pull the latest image
+#             docker pull blessed1dominic/starlight:${{ github.sha }}
+#             # Stop the current container
+#             docker stop starlight-app || true
+#             docker rm starlight-app || true
+#             # Run the new container
+#             docker run -d --name starlight-app \
+#               blessed1dominic/starlight:${{ github.sha }} \
+#               # Add other necessary options here
+
+
 name: CI/CD for Frontend (Starlight)
 
 on:
@@ -23,6 +76,7 @@ jobs:
         working-directory: ./starlight
         run: |
           docker build -t blessed1dominic/starlight:${{ github.sha }} .
+          docker tag blessed1dominic/starlight:${{ github.sha }} blessed1dominic/starlight:latest
 
       - name: Log in to DockerHub
         run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
@@ -30,6 +84,7 @@ jobs:
       - name: Push Docker Image
         run: |
           docker push blessed1dominic/starlight:${{ github.sha }}
+          docker push blessed1dominic/starlight:latest
 
       - name: SSH into GCP and Deploy Frontend
         uses: appleboy/ssh-action@v0.1.0
@@ -41,11 +96,14 @@ jobs:
             # Backup current container (optional)
             docker commit starlight-app starlight-app-backup || true
             # Pull the latest image
-            docker pull blessed1dominic/starlight:${{ github.sha }}
-            # Stop the current container
+            docker pull blessed1dominic/starlight:latest
+            # Stop the current container gracefully
             docker stop starlight-app || true
+            sleep 5 # Wait for 5 seconds before forcefully stopping
             docker rm starlight-app || true
-            # Run the new container
+            # Run the new container with restart policy and environment variables if needed
             docker run -d --name starlight-app \
-              blessed1dominic/starlight:${{ github.sha }} \
+              --restart unless-stopped \
+              -p 3003:3003 \
+              blessed1dominic/starlight:latest \
               # Add other necessary options here
