@@ -51,4 +51,6 @@ jobs:
             docker pull blessed1dominic/starlight:latest
 
             # Use Docker Compose to start the containers
-            docker-compose up -d
+            
+            docker-compose -f ~/docker-curriculum/docker-compose.yml up -d
+
