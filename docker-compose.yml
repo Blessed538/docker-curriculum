@@ -13,13 +13,18 @@ services:
     networks:
       - npm_network
 
-  frontend:
-    build:
-      context: blessed1dominic/starlight:latest
+  # frontend:
+  #   build:
+  #     context: blessed1dominic/starlight:latest
+  #   container_name: starlight-app
+  #   networks:
+  #     - npm_network
+   frontend:
+    image: blessed1dominic/starlight:latest  # Use the pulled image instead of building
     container_name: starlight-app
     networks:
       - npm_network
-
+      
   backend:
     build:
       context: ./flask-app
