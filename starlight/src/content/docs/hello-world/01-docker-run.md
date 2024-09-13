@@ -2,7 +2,7 @@
 title: Docker Run
 ---
 
-Great! Let's now run a Docker **container** based on this image. To do that we are going to use the almighty `docker run` command.
+Glory! Let's now run a Docker **container** based on this image. To do that we are going to use the almighty `docker run` command.
 
 ```bash
 $ docker run busybox
